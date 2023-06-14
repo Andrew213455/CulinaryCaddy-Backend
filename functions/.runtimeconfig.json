@@ -1,0 +1,5 @@
+{
+  "mongodb": {
+    "uri": "mongodb+srv://woodringandrew:redbull@cluster0.hqbvu9r.mongodb.net/culinary_caddy?retryWrites=true&w=majority"
+  }
+}

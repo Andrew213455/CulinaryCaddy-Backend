@@ -1,0 +1,76 @@
+import express from "express";
+import { getClient } from "../db";
+import Account from "../models/Account";
+import { ObjectId } from "mongodb";
+
+const accountRouter = express.Router();
+
+const errorResponse = (error: any, res: any) => {
+  console.error("FAIL", error);
+  res.status(500).json({ message: "Internal Server Error" });
+};
+
+accountRouter.get("/accounts", async (req, res) => {
+  try {
+    const client = await getClient();
+    const cursor = client.db().collection<Account>("accounts").find();
+    const results = await cursor.toArray();
+    res.json(results);
+  } catch (err) {
+    errorResponse(err, res);
+  }
+});
+
+accountRouter.get("/accounts/:id", async (req, res) => {
+  try {
+    const _id: ObjectId = new ObjectId(req.params.id);
+    const client = await getClient();
+    const result = await client
+      .db()
+      .collection<Account>("accounts")
+      .findOne({ _id });
+    if (result) {
+      res.status(200);
+      res.json(result);
+    } else {
+      res.status(404);
+      res.send(`Account not found`);
+    }
+  } catch (err) {
+    errorResponse(err, res);
+  }
+});
+
+accountRouter.post("/accounts", async (req, res) => {
+  const newAccount: Account = req.body;
+  try {
+    const client = await getClient();
+    await client.db().collection<Account>("accounts").insertOne(newAccount);
+    res.status(201).json(newAccount);
+  } catch (err) {
+    errorResponse(err, res);
+  }
+});
+
+accountRouter.put("/users/:id", async (req, res) => {
+  try {
+    const _id: ObjectId = new ObjectId(req.params.id);
+    const updatedUser: Account = req.body;
+    const client = await getClient();
+    const result = await client
+      .db()
+      .collection<Account>("accounts")
+      .replaceOne({ _id }, updatedUser);
+    if (result.matchedCount) {
+      res.status(200);
+      res.json(updatedUser);
+    } else {
+      res.status(404);
+      res.send("User not found");
+    }
+  } catch (err) {
+    errorResponse(err, res);
+  }
+});
+
+export default accountRouter;
