@@ -69,6 +69,27 @@ accountRouter.put("/users/:id", async (req, res) => {
   }
 });
 
+accountRouter.patch("/users/:id", async (req, res) => {
+  try {
+    const _id: ObjectId = new ObjectId(req.params.id);
+    const updatedUser: Account = req.body;
+    const client = await getClient();
+    const result = await client
+      .db()
+      .collection<Account>("accounts")
+      .updateOne({ favorite: }, updatedUser);
+    if (result.matchedCount) {
+      res.status(200);
+      res.json(updatedUser);
+    } else {
+      res.status(404);
+      res.send("User not found");
+    }
+  } catch (err) {
+    errorResponse(err, res);
+  }
+});
+
 accountRouter.delete("/users/:id", async (req, res) => {
   try {
     const _id: ObjectId = new ObjectId(req.params.id);
