@@ -70,27 +70,6 @@ accountRouter.put("/users/:id", async (req, res) => {
   }
 });
 
-accountRouter.patch("/users/:id", async (req, res) => {
-  try {
-    const _id: ObjectId = new ObjectId(req.params.id);
-    const newFavorite: Recipe = req.body;
-    const client = await getClient();
-    const result = await client
-      .db()
-      .collection<Account>("accounts")
-      .updateOne({ _id }, { $push: { favorites: newFavorite } });
-    if (result.matchedCount) {
-      res.status(200);
-      res.json(newFavorite);
-    } else {
-      res.status(404);
-      res.send("User not found");
-    }
-  } catch (err) {
-    errorResponse(err, res);
-  }
-});
-
 accountRouter.delete("/users/:id", async (req, res) => {
   try {
     const _id: ObjectId = new ObjectId(req.params.id);
@@ -101,6 +80,27 @@ accountRouter.delete("/users/:id", async (req, res) => {
       .deleteOne({ _id });
     if (result.deletedCount > 0) {
       res.sendStatus(204);
+    } else {
+      res.status(404);
+      res.send("User not found");
+    }
+  } catch (err) {
+    errorResponse(err, res);
+  }
+});
+
+accountRouter.patch("/users/:id", async (req, res) => {
+  try {
+    const id: string = req.params.id;
+    const newFavorite: Recipe = req.body;
+    const client = await getClient();
+    const result = await client
+      .db()
+      .collection<Account>("accounts")
+      .updateOne({ googleId: id }, { $push: { favorites: newFavorite } });
+    if (result.matchedCount) {
+      res.status(200);
+      res.json(newFavorite);
     } else {
       res.status(404);
       res.send("User not found");
