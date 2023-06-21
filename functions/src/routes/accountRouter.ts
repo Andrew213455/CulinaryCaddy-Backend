@@ -23,19 +23,15 @@ accountRouter.get("/accounts", async (req, res) => {
 
 accountRouter.get("/accounts/:id", async (req, res) => {
   try {
-    const _id: ObjectId = new ObjectId(req.params.id);
+    const _id: string = req.params.id;
     const client = await getClient();
     const result = await client
       .db()
       .collection<Account>("accounts")
-      .findOne({ _id });
-    if (result) {
-      res.status(200);
-      res.json(result);
-    } else {
-      res.status(404);
-      res.send(`Account not found`);
-    }
+      .findOne({ googleId: _id });
+
+    res.status(200);
+    res.json(result);
   } catch (err) {
     errorResponse(err, res);
   }
@@ -64,6 +60,25 @@ accountRouter.put("/users/:id", async (req, res) => {
     if (result.matchedCount) {
       res.status(200);
       res.json(updatedUser);
+    } else {
+      res.status(404);
+      res.send("User not found");
+    }
+  } catch (err) {
+    errorResponse(err, res);
+  }
+});
+
+accountRouter.delete("/users/:id", async (req, res) => {
+  try {
+    const _id: ObjectId = new ObjectId(req.params.id);
+    const client = await getClient();
+    const result = await client
+      .db()
+      .collection<Account>("accounts")
+      .deleteOne({ _id });
+    if (result.deletedCount > 0) {
+      res.sendStatus(204);
     } else {
       res.status(404);
       res.send("User not found");
