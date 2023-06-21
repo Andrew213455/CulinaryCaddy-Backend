@@ -2,6 +2,7 @@ import express from "express";
 import { getClient } from "../db";
 import Account from "../models/Account";
 import { ObjectId } from "mongodb";
+import Recipe from "../models/Recipe";
 
 const accountRouter = express.Router();
 
@@ -72,15 +73,15 @@ accountRouter.put("/users/:id", async (req, res) => {
 accountRouter.patch("/users/:id", async (req, res) => {
   try {
     const _id: ObjectId = new ObjectId(req.params.id);
-    const updatedUser: Account = req.body;
+    const newFavorite: Recipe = req.body;
     const client = await getClient();
     const result = await client
       .db()
       .collection<Account>("accounts")
-      .updateOne({ favorite: }, updatedUser);
+      .updateOne({ _id }, { $push: { favorites: newFavorite } });
     if (result.matchedCount) {
       res.status(200);
-      res.json(updatedUser);
+      res.json(newFavorite);
     } else {
       res.status(404);
       res.send("User not found");

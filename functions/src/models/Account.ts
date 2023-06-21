@@ -1,11 +1,5 @@
 import { ObjectId } from "mongodb";
-
-interface Recipe {
-  id: string;
-  title: string;
-  instructions: string;
-  image: string;
-}
+import Recipe from "./Recipe";
 
 export default interface Account {
   _id: ObjectId;
