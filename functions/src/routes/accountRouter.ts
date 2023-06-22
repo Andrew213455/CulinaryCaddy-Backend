@@ -98,9 +98,38 @@ accountRouter.patch("/users/:id", async (req, res) => {
       .db()
       .collection<Account>("accounts")
       .updateOne({ googleId: id }, { $push: { favorites: newFavorite } });
+    const updatedAccount: Account | null = await client
+      .db()
+      .collection<Account>("accounts")
+      .findOne({ googleId: id });
     if (result.matchedCount) {
       res.status(200);
-      res.json(newFavorite);
+      res.json(updatedAccount);
+    } else {
+      res.status(404);
+      res.send("User not found");
+    }
+  } catch (err) {
+    errorResponse(err, res);
+  }
+});
+
+accountRouter.patch("/users/favorites/:id", async (req, res) => {
+  try {
+    const id: string = req.params.id;
+    const favoriteToDelete: Recipe = req.body;
+    const client = await getClient();
+    const result = await client
+      .db()
+      .collection<Account>("accounts")
+      .updateOne({ googleId: id }, { $pull: { favorites: favoriteToDelete } });
+    const updatedAccount: Account | null = await client
+      .db()
+      .collection<Account>("accounts")
+      .findOne({ googleId: id });
+    if (result.matchedCount) {
+      res.status(200);
+      res.json(updatedAccount);
     } else {
       res.status(404);
       res.send("User not found");
