@@ -89,7 +89,7 @@ accountRouter.delete("/users/:id", async (req, res) => {
   }
 });
 
-accountRouter.patch("/users/:id", async (req, res) => {
+accountRouter.patch("/fave/add/:id", async (req, res) => {
   try {
     const id: string = req.params.id;
     const newFavorite: Recipe = req.body;
@@ -114,7 +114,7 @@ accountRouter.patch("/users/:id", async (req, res) => {
   }
 });
 
-accountRouter.patch("/users/favorites/:id", async (req, res) => {
+accountRouter.patch("/fave/delete/:id", async (req, res) => {
   try {
     const id: string = req.params.id;
     const favoriteToDelete: Recipe = req.body;
@@ -122,7 +122,10 @@ accountRouter.patch("/users/favorites/:id", async (req, res) => {
     const result = await client
       .db()
       .collection<Account>("accounts")
-      .updateOne({ googleId: id }, { $pull: { favorites: favoriteToDelete } });
+      .updateOne(
+        { googleId: id },
+        { $pull: { favorites: { id: favoriteToDelete.id } } }
+      );
     const updatedAccount: Account | null = await client
       .db()
       .collection<Account>("accounts")
