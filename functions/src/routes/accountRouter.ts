@@ -3,7 +3,6 @@ import { getClient } from "../db";
 import Account from "../models/Account";
 import { ObjectId } from "mongodb";
 import Recipe from "../models/Recipe";
-import Notes from "../models/Notes";
 
 const accountRouter = express.Router();
 
@@ -127,31 +126,6 @@ accountRouter.patch("/fave/delete/:id", async (req, res) => {
         { googleId: id },
         { $pull: { favorites: { id: favoriteToDelete.id } } }
       );
-    const updatedAccount: Account | null = await client
-      .db()
-      .collection<Account>("accounts")
-      .findOne({ googleId: id });
-    if (result.matchedCount) {
-      res.status(200);
-      res.json(updatedAccount);
-    } else {
-      res.status(404);
-      res.send("User not found");
-    }
-  } catch (err) {
-    errorResponse(err, res);
-  }
-});
-
-accountRouter.patch("/note/add/:id", async (req, res) => {
-  try {
-    const id: string = req.params.id;
-    const newNote: Notes = req.body;
-    const client = await getClient();
-    const result = await client
-      .db()
-      .collection<Account>("accounts")
-      .updateOne({ googleId: id }, { $push: { notes: newNote } });
     const updatedAccount: Account | null = await client
       .db()
       .collection<Account>("accounts")
