@@ -13,12 +13,29 @@ const errorResponse = (error: any, res: any) => {
 notesRouter.get("/notes/:accountId/:recipeId", async (req, res) => {
   try {
     const _id: string = req.params.recipeId;
-    const accountId: ObjectId = new ObjectId(req.params.accountId);
+    const accountId: string = req.params.accountId;
     const client = await getClient();
     const result = await client
       .db()
       .collection<Note>("notes")
       .find({ recipeId: _id, accountId: accountId })
+      .toArray();
+    res.status(200);
+    res.json(result);
+  } catch (err) {
+    errorResponse(err, res);
+  }
+});
+
+notesRouter.get("/notes/:accountId", async (req, res) => {
+  try {
+    const accountId: string = req.params.accountId;
+    const client = await getClient();
+    const result = await client
+      .db()
+      .collection<Note>("notes")
+      .find({ accountId: accountId })
+      .sort({ title: 1 })
       .toArray();
     res.status(200);
     res.json(result);
