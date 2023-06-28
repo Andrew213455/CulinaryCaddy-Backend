@@ -10,6 +10,30 @@ const errorResponse = (error: any, res: any) => {
   res.status(500).json({ message: "Internal Server Error" });
 };
 
+ratingRouter.get("/avgRating/:recipeId", async (req, res) => {
+  const recipeId: string = req.params.recipeId;
+  try {
+    const client = await getClient();
+    const result = await client
+      .db()
+      .collection<Rating>("ratings")
+      .aggregate([
+        { $match: { recipeId: recipeId } },
+        {
+          $group: {
+            _id: "$recipeId",
+            avgRating: { $avg: "$stars" },
+          },
+        },
+      ])
+      .toArray();
+    res.status(200);
+    res.json(result);
+  } catch (err) {
+    errorResponse(err, res);
+  }
+});
+
 ratingRouter.get("/rating/:recipeId", async (req, res) => {
   try {
     const recipeId: string = req.params.recipeId;
